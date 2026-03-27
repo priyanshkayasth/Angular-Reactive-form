@@ -1,12 +1,20 @@
 import { Component } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
+import { of } from 'rxjs';
 
 
-function mustControlQuestionaMark(control:AbstractControl){
-  if(control.value.includes('?')){
+function mustControlQuestionaMark(control: AbstractControl) {
+  if (control.value.includes('?')) {
     return null;
   }
-  return {doesNotContainQuestionMark:true}
+  return { doesNotContainQuestionMark: true }
+}
+
+function emailIsUnique(control: AbstractControl) {
+  if (control.value !== 'test@example.com') {
+    return of(null) //emits value instantly
+  }
+  return of({ notUnique: true })
 }
 
 @Component({
@@ -19,19 +27,20 @@ function mustControlQuestionaMark(control:AbstractControl){
 export class LoginComponent {
   form = new FormGroup({
 
-    email: new FormControl('',{
-      validators:[Validators.email,Validators.required]
+    email: new FormControl('', {
+      validators: [Validators.email, Validators.required],
+      asyncValidators: [emailIsUnique]
     }),
-    password: new FormControl('',{
-      validators:[Validators.required,Validators.minLength(6),mustControlQuestionaMark]
+    password: new FormControl('', {
+      validators: [Validators.required, Validators.minLength(6), mustControlQuestionaMark]
     })
   })
 
-  get emailIsInValid(){
+  get emailIsInValid() {
     return this.form.controls.email.touched && this.form.controls.email.dirty && this.form.controls.email.invalid
   }
 
-  get passwordIsInValid(){
+  get passwordIsInValid() {
     return this.form.controls.password.touched && this.form.controls.password.dirty && this.form.controls.password.invalid
   }
 
@@ -39,8 +48,8 @@ export class LoginComponent {
     console.log(this.form);
     const entredEmail = this.form.value.email
     const enteredPassword = this.form.value.password
-    console.log(entredEmail,enteredPassword);
-    
+    console.log(entredEmail, enteredPassword);
+
 
 
   }
